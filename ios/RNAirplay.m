@@ -65,10 +65,14 @@ RCT_EXPORT_METHOD(showMenu)
     for (AVAudioSessionPortDescription * output in currentRoute.outputs) {
         deviceName = output.portName;
         portType = output.portType;
-        NSDictionary *device = @{ @"deviceName" : deviceName, @"portType" : portType};
-        [devices addObject: device];
+        if ([portType isEqualToString:AVAudioSessionPortAirPlay]) {
+            NSDictionary *device = @{ @"deviceName" : deviceName, @"portType" : portType};
+            [devices addObject: device];
+        }
     }
-    [self sendEventWithName:@"deviceConnected" body:@{@"devices": devices}];
+    if ([devices count] > 0) {
+        [self sendEventWithName:@"deviceConnected" body:@{@"devices": devices}];
+    }
 }
 
 - (NSArray<NSString *> *)supportedEvents {
