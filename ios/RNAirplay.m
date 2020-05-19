@@ -38,7 +38,7 @@ RCT_EXPORT_METHOD(disconnect)
 
 RCT_EXPORT_METHOD(showMenu)
 {
-    MPVolumeView *airplayView = [[MPVolumeView alloc] init];
+    MPVolumeView *airplayView = [[MPVolumeView alloc] initWithFrame:CGRectMake(-100, -100, 0, 0 )];
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     [window addSubview:airplayView];
     
