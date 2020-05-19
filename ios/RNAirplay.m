@@ -2,6 +2,7 @@
 #import "RNAirplayManager.h"
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import <MediaPlayer/MediaPlayer.h>
 
 
 @implementation RNAirplay
@@ -33,6 +34,19 @@ RCT_EXPORT_METHOD(startScan)
 RCT_EXPORT_METHOD(disconnect)
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+RCT_EXPORT_METHOD(showMenu)
+{
+    MPVolumeView *airplayView = [[MPVolumeView alloc] init];
+    UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+    [window addSubview:airplayView];
+    
+    for (UIView *subview in airplayView.subviews) {
+        if ([subview isKindOfClass:[UIButton class]]) {
+            [(UIButton*)subview sendActionsForControlEvents:UIControlEventTouchUpInside];
+        }
+    }
 }
 
 
