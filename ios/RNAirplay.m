@@ -1,8 +1,8 @@
 #import "RNAirplay.h"
 #import "RNAirplayManager.h"
 #import <AVFoundation/AVFoundation.h>
+#import <AVKit/AVKit.h>
 #import <AudioToolbox/AudioToolbox.h>
-#import <MediaPlayer/MediaPlayer.h>
 
 
 @implementation RNAirplay
@@ -38,11 +38,12 @@ RCT_EXPORT_METHOD(disconnect)
 
 RCT_EXPORT_METHOD(showMenu)
 {
-    MPVolumeView *airplayView = [[MPVolumeView alloc] initWithFrame:CGRectMake(-100, -100, 0, 0 )];
+    AVRoutePickerView *routePickerView = [[AVRoutePickerView alloc] init];
+    [routePickerView setHidden:YES];
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
-    [window addSubview:airplayView];
+    [window addSubview:routePickerView];
     
-    for (UIView *subview in airplayView.subviews) {
+    for (UIView *subview in routePickerView.subviews) {
         if ([subview isKindOfClass:[UIButton class]]) {
             [(UIButton*)subview sendActionsForControlEvents:UIControlEventTouchUpInside];
         }
