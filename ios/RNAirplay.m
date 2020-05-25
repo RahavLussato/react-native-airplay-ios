@@ -40,6 +40,9 @@ RCT_EXPORT_METHOD(showMenu)
 {
     AVRoutePickerView *routePickerView = [[AVRoutePickerView alloc] init];
     [routePickerView setHidden:YES];
+    if (@available(iOS 13.0, *)) {
+        [routePickerView setPrioritizesVideoDevices:YES];
+    }
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     [window addSubview:routePickerView];
     
