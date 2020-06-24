@@ -6,6 +6,9 @@
 
 
 @implementation RNAirplay
+{
+  bool hasListeners;
+}
 @synthesize bridge = _bridge;
 
 - (dispatch_queue_t)methodQueue {
@@ -40,12 +43,9 @@ RCT_EXPORT_METHOD(showMenu)
 {
     AVRoutePickerView *routePickerView = [[AVRoutePickerView alloc] init];
     [routePickerView setHidden:YES];
-    if (@available(iOS 13.0, *)) {
-        [routePickerView setPrioritizesVideoDevices:YES];
-    }
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     [window addSubview:routePickerView];
-    
+
     for (UIView *subview in routePickerView.subviews) {
         if ([subview isKindOfClass:[UIButton class]]) {
             [(UIButton*)subview sendActionsForControlEvents:UIControlEventTouchUpInside];
@@ -53,6 +53,25 @@ RCT_EXPORT_METHOD(showMenu)
     }
 }
 
+RCT_EXPORT_METHOD(overrideOutputAudioPort)
+{
+    [[AVAudioSession sharedInstance] setActive: NO error: nil];
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker error:nil];
+    [[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:nil];
+    [[AVAudioSession sharedInstance] setActive: YES error: nil];
+}
+
+// Will be called when this module's first listener is added.
+-(void)startObserving {
+    hasListeners = YES;
+    // Set up any upstream listeners or background tasks as necessary
+}
+
+// Will be called when this module's last listener is removed, or on dealloc.
+-(void)stopObserving {
+    hasListeners = NO;
+    // Remove upstream listeners, stop unnecessary background tasks
+}
 
 - (void)deviceChanged:(NSNotification *)sender {
     // Get current audio output
@@ -69,13 +88,11 @@ RCT_EXPORT_METHOD(showMenu)
     for (AVAudioSessionPortDescription * output in currentRoute.outputs) {
         deviceName = output.portName;
         portType = output.portType;
-        if ([portType isEqualToString:AVAudioSessionPortAirPlay]) {
-            NSDictionary *device = @{ @"deviceName" : deviceName, @"portType" : portType};
-            [devices addObject: device];
-        }
+        NSDictionary *device = @{ @"deviceName" : deviceName, @"portType" : portType};
+        [devices addObject: device];
     }
-    if ([devices count] > 0) {
-        [self sendEventWithName:@"deviceConnected" body:@{@"devices": devices}];
+    if (hasListeners) { // Only send events if anyone is listening
+      [self sendEventWithName:@"deviceConnected" body:@{@"devices": devices}];
     }
 }
 
